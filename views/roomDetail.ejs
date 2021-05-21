@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <%- include ("./fragment/lib") %>
+
+    <link rel="stylesheet" href="/css/chat.css" />
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    <style>
+        #userCount { color: #ccc; }
+    </style>
+</head>
+<body onbeforeunload="fnUnload();">
+    <input type="hidden" name="roomNumber" value="<%= joinInfo.roomNumber %>" />
+    <input type="hidden" name="nickName" value="<%= joinInfo.nickName %>" />
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-5">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <span class="glyphicon glyphicon-comment"></span> Chat <span id="userCount"></span>
+                        <div class="btn-group pull-right">
+                            <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                <span class="glyphicon glyphicon-chevron-down"></span>
+                            </button>
+                            <ul class="dropdown-menu slidedown">
+                                <li>
+                                    <a href="javascript:void(0)" onclick="fnQuit();">
+                                        <span class="glyphicon glyphicon-off"></span>
+                                        나가기
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <ul class="chat">
+                            <!--
+                            <li class="left clearfix">
+                                <span class="chat-img pull-left">
+                                    <img src="http://placehold.it/50/55C1E7/fff&text=U" alt="User Avatar" class="img-circle" />
+                                </span>
+                                <div class="chat-body clearfix">
+                                    <div class="header">
+                                        <strong class="primary-font">Jack Sparrow</strong>
+                                        <small class="pull-right text-muted">
+                                            <span class="glyphicon glyphicon-time"></span>12 mins ago
+                                        </small>
+                                    </div>
+                                    <p>
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare
+                                        dolor, quis ullamcorper ligula sodales.
+                                    </p>
+                                </div>
+                            </li>
+                            <li class="right clearfix">
+                                <span class="chat-img pull-right">
+                                    <img src="http://placehold.it/50/FA6F57/fff&text=ME" alt="User Avatar" class="img-circle" />
+                                </span>
+                                <div class="chat-body clearfix">
+                                    <div class="header">
+                                        <small class=" text-muted">
+                                            <span class="glyphicon glyphicon-time"></span>13 mins ago
+                                        </small>
+                                        <strong class="pull-right primary-font">Bhaumik Patel</strong>
+                                    </div>
+                                    <p>
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare
+                                        dolor, quis ullamcorper ligula sodales.
+                                    </p>
+                                </div>
+                            </li>
+                            -->
+                        </ul>
+                    </div>
+                    <div class="panel-footer">
+                        <div class="input-group">
+                            <input id="message" type="text" class="form-control input-sm" placeholder="메시지를 입력해 주세요." />
+                            <span class="input-group-btn">
+                                <button class="btn btn-warning btn-sm" id="btn_chat">
+                                    보내기
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+
+        socket.emit('JOIN', { room : $('input[name="roomNumber"]').val(), nickName : $('input[name="nickName"]').val() });
+
+        socket.on('join', (data) => {
+            $('#userCount').text('(' + data.userCount + ')');
+
+            let html = '';
+            html += '<li class="noti center clearfix">';
+            html +=     '<p>' + data.nickName + '님이 입장했습니다.' + '</p>'
+            html += '</li>';
+            $('.chat').append(html);
+
+            $('.panel-body').scrollTop($('.panel-body')[0].scrollHeight);
+        });
+
+        socket.on('quit', (data) => {
+            $('#userCount').text('(' + data.userCount + ')');
+
+            let html = '';
+            html += '<li class="noti center clearfix">';
+            html +=     '<p>' + data.nickName + '님이 퇴장했습니다.' + '</p>'
+            html += '</li>';
+            $('.chat').append(html);
+
+            $('.panel-body').scrollTop($('.panel-body')[0].scrollHeight);
+        });
+
+        socket.on('message', (data) => {
+            var nickName = $('input[name="nickName"]').val();
+
+            let html = '';
+            
+            if ( nickName === data.nickName ) {
+                html += '<li class="right clearfix">';
+                html +=     '<span class="chat-img pull-right">';
+                html +=         '<img src="http://placehold.it/50/FA6F57/fff&text=ME" alt="User Avatar" class="img-circle" />';
+                html +=     '</span>';
+            } else {
+                html += '<li class="left clearfix">';
+                html +=     '<span class="chat-img pull-left">';                
+                html +=         '<img src="http://placehold.it/50/55C1E7/fff&text=U" alt="User Avatar" class="img-circle" />';
+                html +=     '</span>';
+            }
+            
+            html += '<div class="chat-body clearfix">';
+            html +=     '<div class="header">';
+
+            if ( nickName === data.nickName ) {
+                html +=         '<small class=" text-muted">';
+                html +=             '<span class="glyphicon glyphicon-time"></span>' + data.time;
+                html +=         '</small>';
+                html +=         '<strong class="pull-right primary-font">' + data.nickName + '</strong>';
+            } else {
+                html +=         '<strong class="primary-font">' + data.nickName + '</strong>';
+                html +=         '<small class="pull-right text-muted">';
+                html +=             '<span class="glyphicon glyphicon-time"></span>' + data.time;
+                html +=         '</small>';
+            }
+
+            html +=     '</div>';
+            html +=     '<p>' + data.message + '</p>';
+            html += '</div>';
+            html += '</li>';
+
+            $('.chat').append(html);
+
+            $('.panel-body').scrollTop($('.panel-body')[0].scrollHeight);
+        });
+
+        function fnQuit() {
+            socket.emit('QUIT', { room : $('input[name="roomNumber"]').val(), nickName : $('input[name="nickName"]').val() });
+            location.href = '/chat/roomList';
+        }
+
+        $('#btn_chat').click(function() {
+            fnSendMessage();
+        });
+
+        $('#message').on('keypress', function(e) {
+            if (e.keyCode === 13) {
+                fnSendMessage();
+            }
+        });
+
+        function fnSendMessage() {
+            if ( !$('#message').val().trim() ) {
+                return false;
+            }
+
+            const data = {
+                room : $('input[name="roomNumber"]').val(), 
+                nickName : $('input[name="nickName"]').val(),
+                message : $('#message').val()
+            };
+
+            socket.emit('MESSAGE', data);
+
+            $('#message').val('');
+        }
+
+        function fnUnload() {
+            socket.emit('QUIT', { room : $('input[name="roomNumber"]').val(), nickName : $('input[name="nickName"]').val() });
+        }
+    </script>
+
+</body>
+</html>

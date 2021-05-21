@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <%- include ("./fragment/lib") %>
+</head>
+<body>
+    <style>
+        .list-group-item { cursor: pointer; }
+    </style>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1>채팅방 목록</h1>
+                <ul class="list-group">
+                    <li class="list-group-item" data-room_number="1">1번방</li>
+                    <li class="list-group-item" data-room_number="2">2번방</li>
+                    <li class="list-group-item" data-room_number="3">3번방</li>
+                </ul>
+            </div>
+        </div>
+
+        <input type="hidden" name="roomNumber" />
+
+        <form id="frm" method="post">
+            <div class="row form-group mt-5 d-none float-right">
+                <label for="nickName">닉네임</label>
+                <div class="col-auto">
+                    <input type="text" name="nickName" id="nickName" />
+                    <input type="button" value="입장" id="btnJoin" class="btn btn-primary mb-2" />
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        $(function() {
+            $('.list-group-item').click(function() {
+                $('.list-group-item').removeClass('active');
+                $(this).addClass('active');
+                $('input[name="roomNumber"]').val( $(this).data('room_number') );
+                $('.form-group').removeClass('d-none');
+            });
+
+            $('#btnJoin').click(function() {
+                if ( !$('#nickName').val().trim() ) {
+                    $('#nickName').focus();
+                    alert('닉네임을 입력해 주세요.');
+                    return false;
+                }
+
+                var url = '/chat/room/' + $('input[name="roomNumber"]').val();
+                $('#frm').attr('action', url).submit();
+            });
+        });
+    </script>
+</body>
+</html>
