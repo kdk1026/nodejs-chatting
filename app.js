@@ -28,9 +28,11 @@ io.on('connection', function(socket) {
     socket.on('QUIT', function(data) {
         socket.leave(data.room);
 
-        const userCount = io.sockets.adapter.rooms.get(data.room).size;
-
-        io.to(data.room).emit('quit', {nickName : data.nickName, userCount : userCount });
+        if ( io.sockets.adapter.rooms.get(data.room) != null ) {
+            const userCount = io.sockets.adapter.rooms.get(data.room).size;
+    
+            io.to(data.room).emit('quit', {nickName : data.nickName, userCount : userCount });
+        }
     });
 
     socket.on('MESSAGE', function(data) {
