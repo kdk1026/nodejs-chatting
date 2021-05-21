@@ -40,11 +40,13 @@
 
     <script>
         $(function() {
+            $('.form-group').hide();
+
             $('.list-group-item').click(function() {
                 $('.list-group-item').removeClass('active');
                 $(this).addClass('active');
                 $('input[name="roomNumber"]').val( $(this).data('room_number') );
-                $('.form-group').removeClass('d-none');
+                $('.form-group').show();
             });
 
             $('#btnJoin').click(function() {
