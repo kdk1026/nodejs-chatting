@@ -3,4 +3,4 @@
   - Server -> Client
 
 2. 대문자
-  - 
+  - Client -> Server
