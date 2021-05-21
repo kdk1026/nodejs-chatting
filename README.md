@@ -2,5 +2,5 @@
 1. 소문자
   - Server -> Client
 
-1. 대문자
+2. 대문자
   - Client -> Server
